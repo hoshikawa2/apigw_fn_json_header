@@ -1,0 +1,50 @@
+{
+  "requestPolicies": {
+    "authentication": {
+      "type": "CUSTOM_AUTHENTICATION",
+      "functionId": "REDACTED",
+      "parameters": {
+        "body": "request.body"
+      }
+    }
+  },
+  "routes": [
+    {
+      "path": "/",
+      "methods": [
+        "ANY"
+      ],
+      "requestPolicies": {
+        "authorization": {
+          "type": "AUTHENTICATION_ONLY"
+        }
+      },
+      "responsePolicies": {
+        "headerTransformations": {
+          "setHeaders": {
+            "items": [
+              {
+                "name": "reqbody",
+                "values": [
+                  "${request.auth[requestbody]}"
+                ],
+                "ifExists": "OVERWRITE"
+              }
+            ]
+          }
+        }
+      },
+      "backend": {
+        "type": "STOCK_RESPONSE_BACKEND",
+        "body": "Hello, world!",
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/plain"
+          }
+        ]
+      }
+    }
+  ]
+}
