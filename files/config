@@ -1,7 +1,6 @@
 [DEFAULT]
-user=ocid1.user.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-fingerprint=a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:a0:
+user=ocid1.user.oc1..[your user OCID]
+fingerprint=00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00[your user fingerprint]
 key_file=./oci_api_key.pem
-tenancy=ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+tenancy=ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 region=us-ashburn-1
-

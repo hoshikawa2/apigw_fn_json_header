@@ -29,7 +29,7 @@ Despite being a mechanism for authentication and authorization in the OCI API Ga
 - Capture data from HEADER, query parameters or the body of the REST call
 - Send this data to OCI Observability with the aim of facilitating the debugging of problems, which are often impossible to detect without this information
 
->**Note:** Consider in your code, as a best practice, use of redaction for HEADER or BODY content, like passwords or sensitive data. Another approach could be to turn on/off your function for debugging purposes.
+>**Note:** If you are sending data to Observability, consider in your code, as a best practice, use of redaction for HEADER or BODY content, like passwords or sensitive data. Another approach could be to turn on/off your function for debugging purposes.
 
 ### Objectives
 
@@ -52,72 +52,195 @@ Despite being a mechanism for authentication and authorization in the OCI API Ga
 
 ## Task 2: Create an OCI Function to capture the HEADERs and BODY from API request
 
-    import io
-    import json
-    import logging
-    import datetime
-    import requests
-    import base64
-    import oci
+This code can do the job of:
 
-    from datetime import timedelta
-    from fdk import response
+- Capture the HEADER and BODY from the API request
+- Validade a body JSON data: There is a method for validate a number of items on each array
+- Send the HEADER and BODY information to OCI Observability
 
-    def handler(ctx, data: io.BytesIO = None):
-        jsonData = "API Error"
-        try:
-            config = oci.config.from_file("./config","DEFAULT")
-            logging = oci.loggingingestion.LoggingClient(config)
-            rdata = json.dumps({
-                "active": True,
-                "context": {
-                    "requestheader": data.getvalue().decode('utf-8'),
-                },
-            })
+        import io
+        import json
+        import logging
+        import requests
+        import oci
 
-            jsonData = data.getvalue().decode('utf-8')
+        from fdk import response
+        from datetime import timedelta
 
-            #envia os logs via oci sdk
-            put_logs_response = logging.put_logs(
-                log_id="ocid1.log.oc1.iad.cbcbdcsbcdcsdhcgshjdcgsdjhcgsdjhcgsjhghjdscsdcsdh",
-                put_logs_details=oci.loggingingestion.models.PutLogsDetails(
-                    specversion="EXAMPLE-specversion-Value",
-                    log_entry_batches=[
-                        oci.loggingingestion.models.LogEntryBatch(
-                            entries=[
-                                oci.loggingingestion.models.LogEntry(
-                                    data=jsonData,
-                                    id="ocid1.test.oc1..00000001.EXAMPLE-id-Value")],
-                            source="EXAMPLE-source-Value",
-                            type="EXAMPLE-type-Value")]))
+        def count_items(dictData):
+            counting = 0
+            for item in dictData:
+                if type(dictData[item]) == list:
+                    counting += len(dictData[item])
+                else:
+                    if not type(dictData[item]) == str:
+                        counting += count_items(dictData[item])
+            return counting
+
+        def handler(ctx, data: io.BytesIO = None):
+            jsonData = "API Error"
+            c = 0
+            try:
+                config = oci.config.from_file("./config","DEFAULT")
+                logging = oci.loggingingestion.LoggingClient(config)
+                rdata = json.dumps({
+                    "active": True,
+                    "context": {
+                        "requestheader": data.getvalue().decode('utf-8'),
+                    },
+                })
+
+                jsonData = data.getvalue().decode('utf-8')
+                # Get the body content from the API request
+                body = dict(json.loads(data.getvalue().decode('utf-8')).get("data"))["body"]
+                body = dict(json.loads(body))
+                # Count the number of items on arrays inside the JSON body
+                c = count_items(body)
+
+                # If JSON body content has more than 1 item in arrays, block the authorization for the API backend
+                if (c > 1):
+                    # Send a log to observability with out of limit of items in array
+                    put_logs_response = logging.put_logs(
+                        log_id="ocid1.log.oc1.iad.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        put_logs_details=oci.loggingingestion.models.PutLogsDetails(
+                            specversion="EXAMPLE-specversion-Value",
+                            log_entry_batches=[
+                                oci.loggingingestion.models.LogEntryBatch(
+                                    entries=[
+                                        oci.loggingingestion.models.LogEntry(
+                                            data="out of limit of items in array " + str(c),
+                                            id="ocid1.test.oc1..00000001.EXAMPLE-id-Value")],
+                                    source="EXAMPLE-source-Value",
+                                    type="EXAMPLE-type-Value")]))
+
+                    return response.Response(
+                        ctx,
+                        status_code=401,
+                        response_data=json.dumps({"active": False, "wwwAuthenticate": "API Gateway JSON"})
+                    )
+
+                # Send a log to observability with HEADERs and BODY content
+                put_logs_response = logging.put_logs(
+                    log_id="ocid1.log.oc1.iad.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    put_logs_details=oci.loggingingestion.models.PutLogsDetails(
+                        specversion="EXAMPLE-specversion-Value",
+                        log_entry_batches=[
+                            oci.loggingingestion.models.LogEntryBatch(
+                                entries=[
+                                    oci.loggingingestion.models.LogEntry(
+                                        data=jsonData,
+                                        id="ocid1.test.oc1..00000001.EXAMPLE-id-Value")],
+                                source="EXAMPLE-source-Value",
+                                type="EXAMPLE-type-Value")]))
+
+                return response.Response(
+                    ctx, response_data=rdata,
+                    status_code=200,
+                    headers={"Content-Type": "application/json"}
+                )
+            except(Exception) as ex:
+                jsonData = 'error parsing json payload: ' + str(ex) + ", " + json.dumps(jsonData)
+                pass
 
             return response.Response(
-                ctx, response_data=rdata,
-                status_code=200,
-                headers={"Content-Type": "application/json"}
+                ctx,
+                status_code=401,
+                response_data=json.dumps({"active": False, "wwwAuthenticate": jsonData})
             )
-        except(Exception) as ex:
-            jsonData = 'error parsing json payload: ' + str(ex) + ", " + json.dumps(jsonData)
-            pass
-
-        return response.Response(
-            ctx,
-            status_code=401,
-            response_data=json.dumps({"active": False, "wwwAuthenticate": jsonData})
-        )
 
 ### Understand the Code
+
+Let's understand the code. 
+
+>**Note**: If you don't know how to develop a function and call it in API Gateway, see [Call a function using API Gateway](https://docs.public.oneportal.content.oci.oraclecloud.com/en-us/iaas/developer-tutorials/tutorials/functions/func-api-gtw/01-summary.htm) before continue.
+
+This method named **count_items** counts for items in any array inside the JSON structure.
+![code-1](./images/code-1.png)
+
+This part of code uses the **OCI SDK** for python to load the configuration file and the private key to access your OCI tenancy.
+
+![code-2](./images/code-2.png)
+
+Here the **rdata** will capture the parameters from the request and prepare the response for authorize the function to call the backend of API Gateway configuration. The **active=True** will execute the authorization
+![code-3](./images/code-3.png)
+
+**jsonData** will be used to generate the **HEADERs** and **BODY** content to **OCI Observability**
+![code-4](./images/code-4.png)
+
+This code will capture only the **BODY** JSON structure from the request
+![code-5](./images/code-5.png)
+
+Here, the code will count the items on the arrays inside the BODY JSON structure.
+If the items count overtake more than 1 item, **active** will be set to **False** and an error log will be send to OCI Observability.
+Replace the **log_id** variable with your **OCID Log** generated in the **Task 1** 
+![code-6](./images/code-6.png)
+
+If the count less or equal 1, a log with request **HEADERs** and **BODY** content will be generated in OCI Observability.
+Remeber to replace the **log_id** variable with your **OCID log**
+>**Note**: You can produce logs in differents **OCI Log**. In this material, only one log was created, but you can create more logs.
+
+![code-7](./images/code-7.png)
+
+In case of an error, a message with the error will be generated here. 
+![code-8](./images/code-8.png)
+
 ### Configure the SDK Authentication to OCI
+
+You need to configure the config file and put your OCI private key and fingerprint with your function before deploy it to the OCI. 
+You will need the **config** and **private key** files generated on your **OCI CLI** installation and configuration.
+
+If you don't have installed or don't know how to install your **OCI CLI** and configure it, see [Installing the OCI CLI](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#Quickstart). This installation and configuration will generate 2 files for you. Find **config** and private key file (default is **oci_api_key.pem**). The folder path will be informed in the installation instructions.
+
+
+
+![code-2](./images/code-2.png)
+
+Download this file [function.zip](./files/function.zip) to see the code, the config file and the private key.
+Replace the config and private key files with your OCI CLI files.
+
+
 ### Build and deploy the function
+
+In this step, we will need to use the **OCI CLI** to create the **OCI functions** and deploy your code into your tenancy.
+
+If you don't know how to create an **OCI functions**, please see [Functions QuickStart](https://docs.oracle.com/en-us/iaas/developer-tutorials/tutorials/functions/func-setup-cli/01-summary.htm) and search for Python's options
+
+You will need to create your function with these information:
+
+- Application: **fn_apigw_json**
 
 ## Task 3: Configure the OCI Function in API Gateway
 
+Let's deploy your **API** and integrate with your **OCI functions**.
+If you don't know how to expose your backend in the **OCI API Gateway**, please see [OCI API Gateway: Setup, Create and Deploy an API](https://www.oracle.com/webfolder/technetwork/tutorials/infographics/oci_apigw_gs_quickview/apigw_quickview_top/apigw_quickview/index.html)
+
+In your API deployment, let's integrate with your **OCI functions** to validate and send requests parameters (Header and BODY) to the **OCI Observability**
+
+
+Edit your deployment
+
 ![config-apigw-1](./images/config-apigw-1.png)
+
+Go to the Authentication Section
 ![config-apigw-2](./images/config-apigw-2.png)
+
+And choose **Single Authentication** and **Authorizer Function**
+![config-apigw-2a](./images/config-apigw-2a.png)
+
+Choose your functions compartment (where you deployed your function)
+
+![config-apigw-2b](./images/config-apigw-2b.png)
+
+Configure the Functions Arguments to capture the **HEADER** and **BODY**. In this tutorial, we will capture the a **HEADER** named **header** and **header2**, and the **BODY** content that will be named as **body**.
+
+![config-apigw-2c](./images/config-apigw-2c.png)
+
+Go to the Routes Section and let's configure the **Header Transformation**.
+This configuration is optional, just to see the response content with the request data (HEADER and BODY content) or the errors generated on the request.
+It will be useful to debug your function.
+
 ![config-apigw-3](./images/config-apigw-3.png)
 
-
-### Configure the Response to show the values of HEADER and BODY
 
 ## Task 4: Test your Request
 
