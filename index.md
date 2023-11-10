@@ -244,12 +244,45 @@ It will be useful to debug your function.
 
 ## Task 4: Test your Request
 
+Now we can test the API request
+
+>**Note**: In your API Deployment, a cache for the Functions arguments will be activate if you configure the Authorizer Function and setup the Functions Arguments. You can stablish what data type will be cached. You can configure cache for query parameter or header but not for body content.
+
+Let's test send only one item on an array in the body.
+
+    curl --location 'https://xxxxxxxxxxxxxxxxxxxx.apigateway.us-ashburn-1.oci.customer-oci.com/path_index/path' \
+    --header 'Content-Type: text/plain' \
+    --header 'header: header' \
+    --header 'header2: header2' \
+    --header 'header3: header3' \
+    --data '{"data": {"clientID": "xxxxxxxxxxxxxxxxxxx", "secretID": "xxxxxxxxxxxxxxxxxxx", "jList":[{"added_by":"Ani","description":"example description.","start_date":"2014-10-10","mark":255,"id":975}]}}' -i
+
+The **header3** was sent but showed in the log because it was not configured as a **Function Argument** in **OCI API Gateway**.
+There is only 1 item on **BODY JSON** array, so it's a valid authorization request.
 ![test-1](./images/test-1.png)
+
+Now, let's put one more item on array and test
+
+    curl --location 'https://xxxxxxxxxxxxxxxxxxxx.apigateway.us-ashburn-1.oci.customer-oci.com/path_index/path' \
+    --header 'Content-Type: text/plain' \
+    --header 'header: header' \
+    --header 'header2: header2' \
+    --header 'header3: header3' \
+    --data '{"data": {"clientID": "xxxxxxxxxxxxxxxxxxx", "secretID": "xxxxxxxxxxxxxxxxxxx", "jList":[{"added_by":"Ani","description":"example description.","start_date":"2014-10-10","mark":255,"id":975}, {"added_by":"Ani","description":"example description.","start_date":"2014-10-10","mark":255,"id":975}]}}' -i
+
+![test-2](./images/test-2.png)
+
 
 ## Related Links
 
 - [OCI SDK API Reference - LoggingClient](https://docs.oracle.com/en-us/iaas/tools/python/2.115.1/api/loggingingestion/client/oci.loggingingestion.LoggingClient.html)
 - [Python OCI SDK Example](https://docs.oracle.com/en-us/iaas/tools/python-sdk-examples/2.115.1/loggingingestion/put_logs.py.html)
+- [Creating Your First API Gateway In The Oracle Cloud](https://blogs.oracle.com/developers/post/creating-your-first-api-gateway-in-the-oracle-cloud)
+- [Call a function using API Gateway](https://docs.public.oneportal.content.oci.oraclecloud.com/en-us/iaas/developer-tutorials/tutorials/functions/func-api-gtw/01-summary.htm)
+- [Installing the OCI CLI](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#Quickstart)
+- [Functions QuickStart](https://docs.oracle.com/en-us/iaas/developer-tutorials/tutorials/functions/func-setup-cli/01-summary.htm)
+- [OCI API Gateway: Setup, Create and Deploy an API](https://www.oracle.com/webfolder/technetwork/tutorials/infographics/oci_apigw_gs_quickview/apigw_quickview_top/apigw_quickview/index.html)
+
 
 ## Acknowledgments
 
