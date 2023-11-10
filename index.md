@@ -52,7 +52,7 @@ Despite being a mechanism for authentication and authorization in the OCI API Ga
 
 ## Task 2: Create an OCI Function to capture the HEADERs and BODY from API request
 
-This code can do the job of:
+This [code](./files/function.zip) can do the job of:
 
 - Capture the HEADER and BODY from the API request
 - Validade a body JSON data: There is a method for validate a number of items on each array
@@ -150,7 +150,7 @@ This code can do the job of:
 
 ### Understand the Code
 
-Let's understand the code. 
+Let's understand the code. This code can be found here [function.zip](./files/function.zip)
 
 >**Note**: If you don't know how to develop a function and call it in API Gateway, see [Call a function using API Gateway](https://docs.public.oneportal.content.oci.oraclecloud.com/en-us/iaas/developer-tutorials/tutorials/functions/func-api-gtw/01-summary.htm) before continue.
 
