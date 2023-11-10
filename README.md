@@ -1,19 +1,10 @@
----
-duration: PT1H00M0S
-description: Learn how to use Oracle Cloud API Gateway, Functions and Observability to validate JSON content and monitor API Headers and Body
-level: Advanced
-roles: Devops;Developer
-products: en/cloud/oracle-cloud-infrastructure/oci
-keywords: APIs REST/SOAP
-inject-note: true
----
 
 # Learn how to use Oracle Cloud API Gateway, Functions and Observability to validate JSON content and monitor API Headers and Body
 
 ## Introduction
 
 When we develop distributed applications, especially in architectures based on microservices, we want components that scale and perform well in their execution.
-They are very complex architectures, components that execute other components that execute other components in an infinite number of endless calls. 
+They are very complex architectures, components that execute other components that execute other components in an infinite number of endless calls.
 
 Planning how to develop each of them is a huge task.
 You can expose your microservices built on a Kubernetes cluster through the OCI API Gateway. There are a series of facilities, such as performing call authentication and authorization, data validation and call optimization, to name just a few.
@@ -36,7 +27,7 @@ Despite being a mechanism for authentication and authorization in the OCI API Ga
 - Configure an API Deployment
 - Develop an OCI Function to capture the HEADER and BODY from the API request
 - Validade a body JSON data
-- Send the HEADER and BODY information to OCI Observability 
+- Send the HEADER and BODY information to OCI Observability
 
 ### Prerequisites
 
@@ -172,7 +163,7 @@ This code will capture only the **BODY** JSON structure from the request
 
 Here, the code will count the items on the arrays inside the BODY JSON structure.
 If the items count overtake more than 1 item, **active** will be set to **False** and an error log will be send to OCI Observability.
-Replace the **log_id** variable with your **OCID Log** generated in the **Task 1** 
+Replace the **log_id** variable with your **OCID Log** generated in the **Task 1**
 ![code-6](./images/code-6.png)
 
 If the count less or equal 1, a log with request **HEADERs** and **BODY** content will be generated in OCI Observability.
@@ -181,12 +172,12 @@ Remeber to replace the **log_id** variable with your **OCID log**
 
 ![code-7](./images/code-7.png)
 
-In case of an error, a message with the error will be generated here. 
+In case of an error, a message with the error will be generated here.
 ![code-8](./images/code-8.png)
 
 ### Configure the SDK Authentication to OCI
 
-You need to configure the config file and put your OCI private key and fingerprint with your function before deploy it to the OCI. 
+You need to configure the config file and put your OCI private key and fingerprint with your function before deploy it to the OCI.
 You will need the **config** and **private key** files generated on your **OCI CLI** installation and configuration.
 
 If you don't have installed or don't know how to install your **OCI CLI** and configure it, see [Installing the OCI CLI](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#Quickstart). This installation and configuration will generate 2 files for you. Find **config** and private key file (default is **oci_api_key.pem**). The folder path will be informed in the installation instructions.
