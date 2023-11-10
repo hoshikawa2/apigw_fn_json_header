@@ -45,9 +45,20 @@ Despite being a mechanism for authentication and authorization in the OCI API Ga
 
 ## Task 1: Configure OCI Observability
 
+First, we need to create a Log in your OCI tenancy to ingest the logs from your function. Select the **Logs** option in the console.
+
 ![logging-1](./images/logging-1.png)
+
+Create a **Custom Log**
+
 ![logging-2](./images/logging-2.png)
+
+Put a **name** in the Log and choose a proper **compartment** and **Log Group**
+
 ![logging-3](./images/logging-3.png)
+
+It's important to capture the **OCID** of your **Log**, you will need this to your **code**
+
 ![logging-4](./images/logging-4.png)
 
 ## Task 2: Create an OCI Function to capture the HEADERs and BODY from API request
@@ -209,6 +220,8 @@ You will need to create your function with these information:
 
 - Application: **fn_apigw_json**
 
+Remember the **compartment** you deployed your function. You will need this information to configure your **OCI API Gateway** deployment.
+
 ## Task 3: Configure the OCI Function in API Gateway
 
 Let's deploy your **API** and integrate with your **OCI functions**.
@@ -227,7 +240,7 @@ Go to the Authentication Section
 And choose **Single Authentication** and **Authorizer Function**
 ![config-apigw-2a](./images/config-apigw-2a.png)
 
-Choose your functions compartment (where you deployed your function)
+Choose your functions compartment (where you deployed your function) and select **fn_apigw_json** application and your function **python-json-header**.
 
 ![config-apigw-2b](./images/config-apigw-2b.png)
 
