@@ -1,6 +1,6 @@
 ---
 duration: PT1H00M0S
-description: Learn how to use Oracle Cloud API Gateway, Functions and Observability for monitoring API Headers and Body
+description: Learn how to use Oracle Cloud API Gateway, Functions and Observability to validate JSON content and monitor API Headers and Body
 level: Advanced
 roles: Devops;Developer
 products: en/cloud/oracle-cloud-infrastructure/oci
@@ -8,7 +8,7 @@ keywords: APIs REST/SOAP
 inject-note: true
 ---
 
-# Learn how to use Oracle Cloud API Gateway, Functions and Observability for monitoring API Headers and Body
+# Learn how to use Oracle Cloud API Gateway, Functions and Observability to validate JSON content and monitor API Headers and Body
 
 ## Introduction
 
