@@ -6,18 +6,18 @@ When we develop distributed applications, especially in architectures based on m
 They are very complex architectures, components that execute other components that execute other components in an infinite number of endless calls.
 
 Planning how to develop each of them is a huge task.
-You can expose your microservices built on a Kubernetes cluster through the OCI API Gateway. There are a series of facilities, such as performing call authentication and authorization, data validation and call optimization, to name just a few.
-There is also the possibility of executing calls with OCI Functions with the aim of creating personalized authentication and authorization mechanisms, when existing methods are not sufficient to solve the need.
+You can expose your microservices built on a **Kubernetes** cluster through the [OCI API Gateway](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm). There are a series of facilities, such as performing call authentication and authorization, data validation and call optimization, to name just a few.
+There is also the possibility of executing calls with [OCI Functions](https://docs.oracle.com/en-us/iaas/Content/Functions/Concepts/functionsoverview.htm) with the aim of creating personalized authentication and authorization mechanisms, when existing methods are not sufficient to solve the need.
 
 This material will show how to use the custom mechanism to validate some use cases such as:
 
 - Validate the size of JSON parameter data
 - Validate the maximum number of JSON items
 
-Despite being a mechanism for authentication and authorization in the OCI API Gateway, it could help with some other needs, such as:
+Despite being a mechanism for authentication and authorization in the **OCI API Gateway**, it could help with some other needs, such as:
 
 - Capture data from HEADER, query parameters or the body of the REST call
-- Send this data to OCI Observability with the aim of facilitating the debugging of problems, which are often impossible to detect without this information
+- Send this data to [OCI Observability](https://docs.oracle.com/en-us/iaas/Content/cloud-adoption-framework/monitoring-visibility-audit.htm) with the aim of facilitating the debugging of problems, which are often impossible to detect without this information
 
 >**Note:** If you are sending data to Observability, consider in your code, as a best practice, use of redaction for HEADER or BODY content, like passwords or sensitive data. Another approach could be to turn on/off your function for debugging purposes.
 
@@ -172,7 +172,7 @@ This code will capture only the **BODY** JSON structure from the request
 ![code-5](./images/code-5.png)
 
 Here, the code will count the items on the arrays inside the BODY JSON structure.
-If the items count overtake more than 1 item, **active** will be set to **False** and an error log will be send to OCI Observability.
+If the items count overtake more than 1 item, **active** will be set to **False** and an error log will be send to **OCI Observability**. To send the log, you will need to use the Python [OCI SDK](https://docs.oracle.com/en-us/iaas/tools/python/2.115.1/api/loggingingestion/client/oci.loggingingestion.LoggingClient.html).
 Replace the **log_id** variable with your **OCID Log** generated in the **Task 1**
 ![code-6](./images/code-6.png)
 
@@ -278,6 +278,9 @@ Now, let's put one more item on array and test
 
 ## Related Links
 
+- [OCI API Gateway](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm)
+- [OCI Functions](https://docs.oracle.com/en-us/iaas/Content/Functions/Concepts/functionsoverview.htm)
+- [OCI Observability](https://docs.oracle.com/en-us/iaas/Content/cloud-adoption-framework/monitoring-visibility-audit.htm)
 - [OCI SDK API Reference - LoggingClient](https://docs.oracle.com/en-us/iaas/tools/python/2.115.1/api/loggingingestion/client/oci.loggingingestion.LoggingClient.html)
 - [Python OCI SDK Example](https://docs.oracle.com/en-us/iaas/tools/python-sdk-examples/2.115.1/loggingingestion/put_logs.py.html)
 - [Creating Your First API Gateway In The Oracle Cloud](https://blogs.oracle.com/developers/post/creating-your-first-api-gateway-in-the-oracle-cloud)
